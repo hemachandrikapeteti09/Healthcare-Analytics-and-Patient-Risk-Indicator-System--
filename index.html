@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Healthcare Analytics Dashboard</title>
+  <style>
+    :root { font-family: Inter, Arial, sans-serif; color: #182230; background: #f4f7fb; }
+    body { margin: 0; }
+    header { padding: 28px max(20px, calc((100% - 1100px)/2)); background: #123b62; color: white; }
+    header h1 { margin: 0 0 8px; font-size: clamp(1.4rem, 3vw, 2rem); }
+    header p { margin: 0; color: #dbeafe; }
+    main { max-width: 1100px; margin: 24px auto; padding: 0 18px 40px; }
+    .notice { padding: 12px 14px; border-radius: 10px; background: #fff7e6; margin-bottom: 18px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+    .card { background: white; border: 1px solid #e3eaf2; border-radius: 14px; padding: 20px; box-shadow: 0 3px 12px #1822300a; }
+    .muted { color: #64748b; font-size: .92rem; }
+    .number { font-size: 2rem; font-weight: 750; margin-top: 8px; }
+    h2 { font-size: 1.15rem; margin: 0 0 16px; }
+    table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+    th, td { padding: 11px 9px; text-align: left; border-bottom: 1px solid #e8edf3; }
+    th { color: #526173; font-weight: 650; }
+    .table-wrap { overflow-x: auto; }
+    .status { font-weight: 700; }
+    footer { text-align: center; color: #64748b; padding: 20px; font-size: .85rem; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Healthcare Analytics Dashboard</h1>
+  <p>Operational visit statistics and illustrative, non-clinical indicators</p>
+</header>
+<main>
+  {% if not db_ok %}
+    <div class="notice"><strong>Database not connected.</strong> Start MySQL, run schema.sql, and check your local .env settings. Details: {{ error }}</div>
+  {% else %}
+    <div class="notice"><span class="status">Database connected.</span> This dashboard is for educational analytics and uses demo data only.</div>
+  {% endif %}
+  <section class="grid">
+    <div class="card"><div class="muted">Total visits</div><div class="number">{{ summary.total_visits }}</div></div>
+    <div class="card"><div class="muted">Departments with visits</div><div class="number">{{ summary.departments|length }}</div></div>
+    <div class="card"><div class="muted">Latest records shown</div><div class="number">{{ visits|length }}</div></div>
+  </section>
+  <section class="card" style="margin-top:18px">
+    <h2>Visits by department</h2>
+    {% if summary.by_department %}
+      <div class="table-wrap"><table><thead><tr><th>Department</th><th>Visits</th></tr></thead><tbody>
+      {% for item in summary.by_department %}<tr><td>{{ item.department }}</td><td>{{ item.visits }}</td></tr>{% endfor %}
+      </tbody></table></div>
+    {% else %}<p class="muted">No visit records yet. Add synthetic demo records through POST /api/records.</p>{% endif %}
+  </section>
+  <section class="card" style="margin-top:18px">
+    <h2>Latest visits</h2>
+    {% if visits %}
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Patient code</th><th>Department</th><th>Date</th><th>Age band</th><th>Visit type</th></tr></thead><tbody>
+      {% for v in visits %}<tr><td>{{ v.visit_id }}</td><td>{{ v.patient_code }}</td><td>{{ v.department }}</td><td>{{ v.visit_date }}</td><td>{{ v.age_band or '—' }}</td><td>{{ v.visit_type or '—' }}</td></tr>{% endfor %}
+      </tbody></table></div>
+    {% else %}<p class="muted">No visits to display.</p>{% endif %}
+  </section>
+  <section class="card" style="margin-top:18px">
+    <h2>Available API endpoints</h2>
+    <p><code>GET /api/health</code> — database connection status</p>
+    <p><code>GET /api/records</code> — list visit records</p>
+    <p><code>POST /api/records</code> — add a visit using JSON</p>
+    <p><code>GET /api/analytics</code> — descriptive analytics</p>
+    <p><code>POST /api/chart</code> — generate a department chart</p>
+  </section>
+  <p class="muted" style="margin-top:18px">Educational project only. Indicators are not diagnoses and must not be used for clinical decisions.</p>
+</main>
+<footer>Healthcare Analytics and Patient Risk Indicator System · Local development demo</footer>
+</body>
+</html>
