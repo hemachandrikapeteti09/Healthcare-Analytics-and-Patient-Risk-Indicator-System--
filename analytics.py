@@ -1,4 +1,6 @@
 
+import numpy as np
+
 # ---------------------------------------------------------
 # Measurement validation and illustrative indicators
 # Educational analytics only — NOT medical diagnosis.
